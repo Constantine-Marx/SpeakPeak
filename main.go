@@ -3,8 +3,18 @@ package main
 import (
 	"SpeakPeak/dao/mysql"
 	"SpeakPeak/logger"
+	"SpeakPeak/routers"
 	"SpeakPeak/settings"
+	"context"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/spf13/viper"
 
 	"go.uber.org/zap"
 )
@@ -15,18 +25,48 @@ func main() {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
 	//2.init logger
-	if err := logger.Init(); err != nil {
+	if err := logger.Init(settings.Conf.LogConfig); err != nil {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
+	defer zap.L().Sync()
 	zap.L().Debug("logger init success...")
 	//3.init Mysql connection
-	if err := mysql.Init(); err != nil {
+	if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
 		fmt.Printf("Init Mysql Failed,err:%v\n", err)
 	}
+	defer mysql.Close()
 	//4.init redis connection
+	//if err := redis.Init(); err != nil {
+	//	fmt.Printf("Init Redis Failed,err:%v\n", err)
+	//	return
+	//}
+	//5.register router
+	r := routers.Setup()
+	//run
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")),
+		Handler: r,
+	}
 
-	//5.init etcd connection
+	//开启一个goroutine启动服务
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen:%s\n", err)
+		}
+	}()
 
-	//6.init server
+	//优雅关机
+	quit := make(chan os.Signal, 1)                      //创建一个接受信号的通道
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) //接收信号
+	<-quit
+	zap.L().Info("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		zap.L().Fatal("Server Shutdown: ", zap.Error(err))
+	}
+
+	zap.L().Info("Server exiting")
 
 }

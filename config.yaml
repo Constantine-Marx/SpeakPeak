@@ -18,3 +18,10 @@ mysql:
   user: "root"
   password: "root"
   dbname: "speakpeak"
+
+redis:
+    host: ""
+    port: 6379
+    password: ""
+    db: 0
+    pool_size: 10
