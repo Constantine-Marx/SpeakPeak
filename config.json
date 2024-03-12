@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "name": "SpeakPeak",
   "mode": "dev",
-  "port": 3000,
+  "port": "8080",
   "log": {
     "level": "info",
     "path": "logs",

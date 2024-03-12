@@ -1,7 +1,7 @@
 package main
 
 import (
-	"SpeakPeak/dao/mysql"
+	"SpeakPeak/controller"
 	"SpeakPeak/logger"
 	"SpeakPeak/routers"
 	"SpeakPeak/settings"
@@ -21,6 +21,7 @@ import (
 
 func main() {
 	//1.load config
+
 	if err := settings.Init(); err != nil {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
@@ -30,19 +31,28 @@ func main() {
 	}
 	defer zap.L().Sync()
 	zap.L().Debug("logger init success...")
+
 	//3.init Mysql connection
-	if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
-		fmt.Printf("Init Mysql Failed,err:%v\n", err)
-	}
-	defer mysql.Close()
+	//if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
+	//	fmt.Printf("Init Mysql Failed,err:%v\n", err)
+	//}
+	//defer mysql.Close()
+
 	//4.init redis connection
 	//if err := redis.Init(); err != nil {
 	//	fmt.Printf("Init Redis Failed,err:%v\n", err)
 	//	return
 	//}
+
+	//初始化内置的翻译器
+	if err := controller.InitTrans("zh"); err != nil {
+		fmt.Printf("init validator trans failed,err%v\n", err)
+		return
+	}
 	//5.register router
 	r := routers.Setup()
 	//run
+	fmt.Printf(":%d", viper.GetInt("app.port"))
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")),
 		Handler: r,

@@ -30,17 +30,17 @@ type LogConfig struct {
 }
 
 type MySQLConfig struct {
-	Host     string `mapstructure:"host"`
+	Host     string `mapstructure:"host" `
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
+	Password string `mapstructure:"password" `
 	DB       string `mapstructure:"db"`
 }
 
 func Init() error {
-	viper.SetConfigFile("config.json")
-	viper.SetConfigType("yaml")
-
+	viper.SetConfigFile("config.yaml")
+	viper.AddConfigPath(".")
+	fmt.Printf("1..%d", viper.GetInt("app.port"))
 	err := viper.ReadInConfig()
 	if err != nil {
 		//load config info failed
@@ -51,6 +51,8 @@ func Init() error {
 		fmt.Printf("viper.Unmarshal Failed, err:%v\n", err)
 		return err
 	}
+	fmt.Printf("2..%d", viper.GetInt("app.port"))
+
 	viper.WatchConfig()
 	//hook
 	viper.OnConfigChange(func(in fsnotify.Event) {
