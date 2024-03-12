@@ -31,21 +31,50 @@ func SignUpHandler(context *gin.Context) {
 		})
 		return
 	}
-	//手动对请求参数进行业务规则校验
-	//if len(p.Username) == 0 || len(p.Password) == 0 || len(p.RePassword) == 0 {
-	//	//error
-	//	zap.L().Error("SignUp with invalid param")
-	//	context.JSON(http.StatusOK, gin.H{
-	//		"msg": "error in request params",
-	//	})
-	//	return
-	//}
 
 	//业务处理
-	logic.SignUp(&p)
+	if err := logic.SignUp(&p); err != nil {
+		zap.L().Error("logic.SignUp failed", zap.String("username", p.Username), zap.Error(err))
+		context.JSON(http.StatusOK, gin.H{
+			"msg": err.Error(),
+		})
+		return
+	}
 	//返回响应
 	context.JSON(http.StatusOK, gin.H{
 		"msg": "success",
 	})
 
+}
+
+func LoginHandler(context *gin.Context) {
+	//参数校验
+	p := new(model.ParamLogin)
+	if err := context.ShouldBindJSON(&p); err != nil {
+		//error
+		zap.L().Error("Login with invalid param", zap.Error(err))
+		//判断是不是validator类型错误
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			context.JSON(http.StatusOK, gin.H{
+				"msg": err.Error(),
+			})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"msg": removeTopStruct(errs.Translate(trans)),
+		})
+		return
+	}
+	//2、
+	if err := logic.Login(p); err != nil {
+		context.JSON(http.StatusOK, gin.H{
+			"msg": "Wrong password",
+		})
+		return
+	}
+	//3、
+	context.JSON(http.StatusOK, gin.H{
+		"msg": "Login success",
+	})
 }

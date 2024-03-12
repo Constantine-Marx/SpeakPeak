@@ -2,7 +2,9 @@ package main
 
 import (
 	"SpeakPeak/controller"
+	"SpeakPeak/dao/mysql"
 	"SpeakPeak/logger"
+	"SpeakPeak/pkg/snowflake"
 	"SpeakPeak/routers"
 	"SpeakPeak/settings"
 	"context"
@@ -26,17 +28,17 @@ func main() {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
 	//2.init logger
-	if err := logger.Init(settings.Conf.LogConfig); err != nil {
+	if err := logger.Init(settings.Conf.LogConfig, viper.GetString("app.mode")); err != nil {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
 	defer zap.L().Sync()
 	zap.L().Debug("logger init success...")
 
 	//3.init Mysql connection
-	//if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
-	//	fmt.Printf("Init Mysql Failed,err:%v\n", err)
-	//}
-	//defer mysql.Close()
+	if err := mysql.Init(settings.Conf.MySQLConfig); err != nil {
+		fmt.Printf("Init Mysql Failed,err:%v\n", err)
+	}
+	defer mysql.Close()
 
 	//4.init redis connection
 	//if err := redis.Init(); err != nil {
@@ -49,10 +51,15 @@ func main() {
 		fmt.Printf("init validator trans failed,err%v\n", err)
 		return
 	}
+
+	if err := snowflake.Init(viper.GetString("app.start_time"), viper.GetInt64("app.machine_id")); err != nil {
+		fmt.Printf("Init Snowflake Failed,err:%v\n", err)
+		return
+	}
 	//5.register router
 	r := routers.Setup()
+
 	//run
-	fmt.Printf(":%d", viper.GetInt("app.port"))
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", viper.GetInt("app.port")),
 		Handler: r,

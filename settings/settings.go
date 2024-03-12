@@ -15,6 +15,8 @@ type AppConfig struct {
 	Name         string `mapstructure:"name"`
 	Mode         string `mapstructure:"mode"`
 	Port         int    `mapstructure:"port"`
+	StartTime    string `mapstructure:"start_time"`
+	MachineID    int64  `mapstructure:"machine_id"`
 	*MySQLConfig `mapstructure:"mysql"`
 	//Redis *RedisConfig `mapstructure:"redis"`
 	*LogConfig `mapstructure:"log"`
@@ -34,13 +36,12 @@ type MySQLConfig struct {
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password" `
-	DB       string `mapstructure:"db"`
+	DB       string `mapstructure:"dbname"`
 }
 
 func Init() error {
 	viper.SetConfigFile("config.yaml")
 	viper.AddConfigPath(".")
-	fmt.Printf("1..%d", viper.GetInt("app.port"))
 	err := viper.ReadInConfig()
 	if err != nil {
 		//load config info failed
@@ -49,10 +50,19 @@ func Init() error {
 	}
 	if err = viper.Unmarshal(Conf); err != nil {
 		fmt.Printf("viper.Unmarshal Failed, err:%v\n", err)
-		return err
 	}
-	fmt.Printf("2..%d", viper.GetInt("app.port"))
 
+	// 打印加载的配置文件内容
+	fmt.Printf("Loaded configuration: %+v\n", viper.AllSettings())
+
+	// 检查是否发生了错误
+	data := viper.AllSettings()
+	if len(data) == 0 {
+		fmt.Println("配置文件中没有找到任何数据")
+	} else {
+		fmt.Println("成功加载配置文件")
+	}
+	fmt.Printf("配置文件中的数据: %+v\n", Conf)
 	viper.WatchConfig()
 	//hook
 	viper.OnConfigChange(func(in fsnotify.Event) {

@@ -2,6 +2,8 @@ app:
   name: "SpeakPeak"
   mode: "dev"
   port: "8080"
+  start_time: "2024-03-12"
+  machine_id: "1"
 
 log:
   level: "info"
@@ -16,12 +18,12 @@ mysql:
   host: "43.139.140.244"
   port: 3306
   user: "root"
-  password: "root"
+  password: "fk$uXvBR3tBhvn%gTDxn"
   dbname: "speakpeak"
 
 redis:
-    host: ""
-    port: 6379
-    password: ""
-    db: 0
-    pool_size: 10
+  host: ""
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10

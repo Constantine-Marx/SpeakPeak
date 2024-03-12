@@ -1,12 +1,12 @@
-package main
+package snowflake
 
 import (
 	"time"
 
-	"github.com/bwmarrin/snowflake"
+	sf "github.com/bwmarrin/snowflake"
 )
 
-var node *snowflake.Node
+var node *sf.Node
 
 func Init(startTime string, machineID int64) (err error) {
 	var st time.Time
@@ -14,11 +14,11 @@ func Init(startTime string, machineID int64) (err error) {
 	if err != nil {
 		return
 	}
-	snowflake.Epoch = st.UnixNano() / 1000000
-	node, err = snowflake.NewNode(machineID)
+	sf.Epoch = st.UnixNano() / 1000000
+	node, err = sf.NewNode(machineID)
 	return
 }
 
-func Generate() int64 {
+func GenID() int64 {
 	return node.Generate().Int64()
 }
