@@ -13,12 +13,18 @@ func Setup() *gin.Engine {
 	r := gin.New()
 	r.Use(logger.GinLogger(), logger.GinRecovery(true))
 
+	v1 := r.Group("/api/v1")
+
 	//注册业务路由
-	r.POST("/signup", controller.SignUpHandler)
-	r.POST("/login", controller.LoginHandler)
-	r.GET("/ping", middlewares.JWTAuthMiddleware(), func(c *gin.Context) {
-		c.String(http.StatusOK, "ping")
-	})
+	v1.POST("/signup", controller.SignUpHandler)
+	v1.POST("/login", controller.LoginHandler)
+
+	v1.Use(middlewares.JWTAuthMiddleware())
+	{
+		v1.GET("/community", controller.CommunityHandler)
+		v1.GET("/community/:id", controller.CommunityDetailHandler)
+	}
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"msg": "404",

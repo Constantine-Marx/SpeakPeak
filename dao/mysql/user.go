@@ -5,17 +5,9 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
-	"errors"
 )
 
 const secret = "marxConstantine"
-
-var (
-	ErrorUserExist       = errors.New("user already exists")
-	ErrorUserNotExist    = errors.New("user not exists")
-	ErrorInvalidPassword = errors.New("invalid password")
-	ErrorUserLogged      = errors.New("user logged in elsewhere")
-)
 
 // CheckUserExist
 func CheckUserExist(username string) (err error) {

@@ -38,9 +38,10 @@ func Login(p *model.ParamLogin) (token string, err error) {
 	if err != nil {
 		return "", err
 	}
-	err = mysql.CheckUserToken(user, token)
-	if err != nil {
-		return "", err
-	}
+	// TODO check if the token is the same
+	//err = mysql.CheckUserToken(user, token)
+	//if err != nil {
+	//	return "", err
+	//}
 	return
 }
