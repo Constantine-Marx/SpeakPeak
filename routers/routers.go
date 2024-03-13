@@ -3,6 +3,7 @@ package routers
 import (
 	"SpeakPeak/controller"
 	"SpeakPeak/logger"
+	"SpeakPeak/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +16,8 @@ func Setup() *gin.Engine {
 	//注册业务路由
 	r.POST("/signup", controller.SignUpHandler)
 	r.POST("/login", controller.LoginHandler)
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "ok")
+	r.GET("/ping", middlewares.JWTAuthMiddleware(), func(c *gin.Context) {
+		c.String(http.StatusOK, "ping")
 	})
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{

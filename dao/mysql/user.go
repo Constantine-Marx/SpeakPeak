@@ -14,6 +14,7 @@ var (
 	ErrorUserExist       = errors.New("user already exists")
 	ErrorUserNotExist    = errors.New("user not exists")
 	ErrorInvalidPassword = errors.New("invalid password")
+	ErrorUserLogged      = errors.New("user logged in elsewhere")
 )
 
 // CheckUserExist
@@ -39,6 +40,36 @@ func InsertUser(user *model.User) (err error) {
 	return
 }
 
+func CheckUserToken(user *model.User, token string) (err error) {
+	sqlStr := `select count(user_id) from user_token where user_id = ?`
+	var count int
+	if err = db.Get(&count, sqlStr, user.UserID); err != nil {
+		return err
+	}
+	if count == 0 {
+		//Insert
+		sqlStr = "insert into user_token(user_id, token) value (?,?)"
+		_, err = db.Exec(sqlStr, user.UserID, token)
+	} else if count > 0 {
+		//Check if the token is the same
+		sqlStr = `select token from user_token where user_id = ?`
+		var GetToken string
+		err = db.Get(&GetToken, sqlStr, user.UserID)
+		if err != nil {
+			return err
+		}
+		if GetToken == token {
+			//Update
+			sqlStr = "update user_token set token = ? where user_id = ?"
+			_, err = db.Exec(sqlStr, token, user.UserID)
+			return nil
+		} else {
+			return ErrorUserLogged
+		}
+	}
+	return nil
+}
+
 func encryptPassword(sourcePassword string) string {
 	h := md5.New()
 	h.Write([]byte(secret))
@@ -49,7 +80,6 @@ func Login(user *model.User) (err error) {
 	srcPasssword := user.Password
 	sqlStr := `select user_id,username, password from user where username = ?`
 	err = db.Get(user, sqlStr, user.Username)
-
 	if err == sql.ErrNoRows {
 		return ErrorUserNotExist
 	}

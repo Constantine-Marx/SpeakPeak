@@ -3,6 +3,7 @@ package logic
 import (
 	"SpeakPeak/dao/mysql"
 	"SpeakPeak/model"
+	"SpeakPeak/pkg/jwt"
 	"SpeakPeak/pkg/snowflake"
 )
 
@@ -23,10 +24,23 @@ func SignUp(p *model.ParamSignUp) error {
 	return mysql.InsertUser(user)
 }
 
-func Login(p *model.ParamLogin) (err error) {
+func Login(p *model.ParamLogin) (token string, err error) {
 	user := &model.User{
 		Username: p.Username,
 		Password: p.Password,
+		Token:    p.Token,
 	}
-	return mysql.Login(user)
+
+	if err = mysql.Login(user); err != nil {
+		return "", err
+	}
+	token, err = jwt.GenToken(user.UserID, user.Username)
+	if err != nil {
+		return "", err
+	}
+	err = mysql.CheckUserToken(user, token)
+	if err != nil {
+		return "", err
+	}
+	return
 }

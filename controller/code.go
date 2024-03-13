@@ -7,17 +7,30 @@ const (
 	CodeInvalidParam
 	CodeUserExist
 	CodeUserNotExist
+	CodeUserLogged
 	CodeInvalidPassword
 	CodeServerBusy
+
+	CodeInvalidToken
+	CodeNeedLogin
+	CodeInvalidAuth
+	CodeInvalidTokenFormat
+	CodeTokenExpired
 )
 
 var codeMsgMap = map[RetCode]string{
-	CodeSuccess:         "success",
-	CodeInvalidParam:    "invaild param",
-	CodeUserExist:       "user already exists",
-	CodeUserNotExist:    "user not exists",
-	CodeInvalidPassword: "invalid password",
-	CodeServerBusy:      "server busy",
+	CodeSuccess:            "success",
+	CodeInvalidParam:       "invaild param",
+	CodeUserExist:          "user already exists",
+	CodeUserNotExist:       "user not exists",
+	CodeUserLogged:         "user logged in elsewhere",
+	CodeInvalidPassword:    "invalid password",
+	CodeServerBusy:         "server busy",
+	CodeInvalidToken:       "invalid token",
+	CodeNeedLogin:          "need login",
+	CodeInvalidAuth:        "invalid auth",
+	CodeInvalidTokenFormat: "invalid token format",
+	CodeTokenExpired:       "token expired",
 }
 
 func (c RetCode) Msg() string {

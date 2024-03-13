@@ -11,4 +11,5 @@ type ParamSignUp struct {
 type ParamLogin struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	Token    string `json:"token"`
 }
