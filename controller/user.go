@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"SpeakPeak/dao/mysql"
 	"SpeakPeak/logic"
 	"SpeakPeak/model"
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -21,23 +23,21 @@ func SignUpHandler(context *gin.Context) {
 		//判断是不是validator类型错误
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			context.JSON(http.StatusOK, gin.H{
-				"msg": err.Error(),
-			})
+			ResponseError(context, CodeInvalidParam)
 			return
 		}
-		context.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)),
-		})
+		ResponseErrorWithMsg(context, CodeInvalidParam, removeTopStruct(errs.Translate(trans)))
 		return
 	}
 
 	//业务处理
 	if err := logic.SignUp(&p); err != nil {
 		zap.L().Error("logic.SignUp failed", zap.String("username", p.Username), zap.Error(err))
-		context.JSON(http.StatusOK, gin.H{
-			"msg": err.Error(),
-		})
+		if errors.Is(err, mysql.ErrorUserExist) {
+			ResponseError(context, CodeUserExist)
+			return
+		}
+		ResponseError(context, CodeServerBusy)
 		return
 	}
 	//返回响应
@@ -56,25 +56,21 @@ func LoginHandler(context *gin.Context) {
 		//判断是不是validator类型错误
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			context.JSON(http.StatusOK, gin.H{
-				"msg": err.Error(),
-			})
+			ResponseError(context, CodeInvalidParam)
 			return
 		}
-		context.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)),
-		})
+		ResponseErrorWithMsg(context, CodeInvalidParam, removeTopStruct(errs.Translate(trans)))
 		return
 	}
 	//2、
 	if err := logic.Login(p); err != nil {
-		context.JSON(http.StatusOK, gin.H{
-			"msg": "Wrong password",
-		})
-		return
+		zap.L().Error("logic.Login failed", zap.String("username", p.Username), zap.Error(err))
+		if errors.Is(err, mysql.ErrorUserNotExist) {
+			ResponseError(context, CodeUserNotExist)
+			return
+		}
+		ResponseError(context, CodeInvalidPassword)
 	}
 	//3、
-	context.JSON(http.StatusOK, gin.H{
-		"msg": "Login success",
-	})
+	ResponseSuccess(context, nil)
 }

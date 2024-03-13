@@ -10,6 +10,12 @@ import (
 
 const secret = "marxConstantine"
 
+var (
+	ErrorUserExist       = errors.New("user already exists")
+	ErrorUserNotExist    = errors.New("user not exists")
+	ErrorInvalidPassword = errors.New("invalid password")
+)
+
 // CheckUserExist
 func CheckUserExist(username string) (err error) {
 	sqlStr := `select count(user_id) from user where username = ?`
@@ -18,7 +24,7 @@ func CheckUserExist(username string) (err error) {
 		return err
 	}
 	if count > 0 {
-		return errors.New("user already exists")
+		return ErrorUserExist
 	}
 	return
 }
@@ -45,7 +51,7 @@ func Login(user *model.User) (err error) {
 	err = db.Get(user, sqlStr, user.Username)
 
 	if err == sql.ErrNoRows {
-		return errors.New("No User")
+		return ErrorUserNotExist
 	}
 
 	if err != nil {
@@ -53,7 +59,7 @@ func Login(user *model.User) (err error) {
 	}
 	password := encryptPassword(srcPasssword)
 	if password != user.Password {
-		return errors.New("Wrong Password")
+		return ErrorInvalidPassword
 	}
 	return nil
 }

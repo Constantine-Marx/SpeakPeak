@@ -14,6 +14,7 @@ func Setup() *gin.Engine {
 
 	//注册业务路由
 	r.POST("/signup", controller.SignUpHandler)
+	r.POST("/login", controller.LoginHandler)
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
