@@ -22,7 +22,7 @@ mysql:
   dbname: "speakpeak"
 
 redis:
-  host: ""
+  host: "43.139.140.244"
   port: 6379
   password: ""
   db: 0

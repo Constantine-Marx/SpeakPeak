@@ -3,6 +3,7 @@ package main
 import (
 	"SpeakPeak/controller"
 	"SpeakPeak/dao/mysql"
+	"SpeakPeak/dao/redis"
 	"SpeakPeak/logger"
 	"SpeakPeak/pkg/snowflake"
 	"SpeakPeak/routers"
@@ -31,7 +32,12 @@ func main() {
 	if err := logger.Init(settings.Conf.LogConfig, viper.GetString("app.mode")); err != nil {
 		fmt.Printf("Init Logger Failed,err:%v\n", err)
 	}
-	defer zap.L().Sync()
+	defer func(l *zap.Logger) {
+		err := l.Sync()
+		if err != nil {
+			fmt.Printf("zap logger sync failed,err:%v\n", err)
+		}
+	}(zap.L())
 	zap.L().Debug("logger init success...")
 
 	//3.init Mysql connection
@@ -41,10 +47,11 @@ func main() {
 	defer mysql.Close()
 
 	//4.init redis connection
-	//if err := redis.Init(); err != nil {
-	//	fmt.Printf("Init Redis Failed,err:%v\n", err)
-	//	return
-	//}
+	if err := redis.Init(); err != nil {
+		fmt.Printf("Init Redis Failed,err:%v\n", err)
+		return
+	}
+	defer redis.Close()
 
 	//初始化内置的翻译器
 	if err := controller.InitTrans("zh"); err != nil {

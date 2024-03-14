@@ -13,3 +13,8 @@ type ParamLogin struct {
 	Password string `json:"password" binding:"required"`
 	Token    string `json:"token"`
 }
+
+type ParamVoteData struct {
+	PostID int64 `json:"post_id,string" binding:"required"`             // 帖子id
+	Direct int8  `json:"direct,string" binding:"required,oneof=1 0 -1"` // 赞成票(1)还是反对票(-1)
+}
