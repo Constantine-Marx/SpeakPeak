@@ -9,6 +9,13 @@ import (
 	"go.uber.org/zap"
 )
 
+//@Summary Create a post
+//@Produce json
+//@Param Authorization header string true "
+//@Param post body model.Post true "post info"
+//@Success 200 {object} Response
+//@Router /post [post]
+
 func CreatePostHandler(context *gin.Context) {
 	p := new(model.Post)
 	if err := context.ShouldBindJSON(p); err != nil {

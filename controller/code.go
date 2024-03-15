@@ -1,5 +1,12 @@
 package controller
 
+//@Summary Response code
+//@Description Response code
+//@Produce json
+//@Success 200 {object} ResCode
+//@Router /code [get]
+//@Tags code
+
 type RetCode int64
 
 const (

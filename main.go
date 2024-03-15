@@ -22,6 +22,18 @@ import (
 	"go.uber.org/zap"
 )
 
+// @title SpeakPeak API
+// @version 1.0
+// @description SpeakPeak API
+// @termsOfService
+// @contact name
+// @license name
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http
+// @schemes https
+// @schemes ws
+// @schemes wss
 func main() {
 	//1.load config
 
